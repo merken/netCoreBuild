@@ -1,0 +1,8 @@
+version: '2'
+
+services:
+  merken.hereyougo.abuildserver:
+    image: merken.hereyougo.abuildserver
+    build:
+      context: ./Merken.HereYouGo.ABuildServer
+      dockerfile: Dockerfile

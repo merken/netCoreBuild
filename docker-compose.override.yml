@@ -1,0 +1,8 @@
+version: '2'
+
+services:
+  merken.hereyougo.abuildserver:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "80"
