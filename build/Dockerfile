@@ -1,5 +1,5 @@
 #this is the base image we use to create our image from
-FROM jenkins:2.60.1
+FROM jenkins:2.60.2
 #just info about who created this
 MAINTAINER Maarten Merken
 #get rid of admin password setup
