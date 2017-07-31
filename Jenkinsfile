@@ -3,6 +3,7 @@ node {
     ws('netcore') {
         try{
             stage("SCM Commit") {
+				deleteDir()
 				cloneRepo()
             }
             
@@ -22,6 +23,5 @@ node {
 }
 
 def cloneRepo() {
-    bat([script: "git config --system core.longpaths true"])
-    git branch: master, url: 'git@github.com:merken/netCoreBuild.git'
+    checkout scm
 }
