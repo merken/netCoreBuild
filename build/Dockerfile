@@ -10,12 +10,39 @@ COPY pipelineTemplate.xml /usr/share/jenkins/ref/pipelineTemplate.xml
 RUN /usr/local/bin/install-plugins.sh bouncycastle-api cloudbees-folder structs junit antisamy-markup-formatter pam-auth windows-slaves display-url-api mailer ldap token-macro external-monitor-job icon-shim matrix-auth script-security matrix-project build-timeout credentials workflow-step-api plain-credentials credentials-binding timestamper scm-api workflow-api workflow-support durable-task workflow-durable-task-step resource-disposer ws-cleanup pipeline-milestone-step jquery-detached ace-editor workflow-scm-step workflow-cps pipeline-input-step pipeline-stage-step workflow-job pipeline-graph-analysis pipeline-rest-api handlebars momentjs pipeline-stage-view pipeline-build-step pipeline-model-api pipeline-model-extensions ssh-credentials git-client git-server workflow-cps-global-lib branch-api workflow-multibranch authentication-tokens docker-commons docker-workflow pipeline-stage-tags-metadata pipeline-model-declarative-agent workflow-basic-steps pipeline-model-definition workflow-aggregator jackson2-api github-api git github github-branch-source pipeline-github-lib ssh-slaves javadoc maven-plugin dashboard-view build-name-setter ant run-condition conditional-buildstep parameterized-trigger jquery build-pipeline-plugin xunit
 
 USER root
-# .NET Core runtime deps https://github.com/dotnet/dotnet-docker/blob/master/2.0/runtime-deps/stretch/Dockerfile
+#buildpack-deps stretch:curl https://github.com/docker-library/buildpack-deps/blob/master/stretch/curl/Dockerfile
+RUN apt-get update && apt-get install -y --no-install-recommends \
+		ca-certificates \
+		curl \
+		wget \
+	&& rm -rf /var/lib/apt/lists/*
+
+RUN set -ex; \
+	if ! command -v gpg > /dev/null; then \
+		apt-get update; \
+		apt-get install -y --no-install-recommends \
+			gnupg2 \
+			dirmngr \
+		; \
+		rm -rf /var/lib/apt/lists/*; \
+	fi
+
+#buildpack-deps stretch:scm https://github.com/docker-library/buildpack-deps/blob/master/stretch/scm/Dockerfile
+# procps is very common in build systems, and is a reasonably small package
+RUN apt-get update && apt-get install -y --no-install-recommends \
+		bzr \
+		git \
+		mercurial \
+		openssh-client \
+		subversion \
+		\
+		procps \
+	&& rm -rf /var/lib/apt/lists/*
+
+# Install .NET Core SDK https://github.com/dotnet/dotnet-docker/blob/master/2.0/sdk/stretch/Dockerfile
+# Install .NET CLI dependencies
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-        ca-certificates \
-        \
-# .NET Core dependencies
         libc6 \
         libcurl3 \
         libgcc1 \
@@ -29,20 +56,23 @@ RUN apt-get update \
         zlib1g \
     && rm -rf /var/lib/apt/lists/*
 
-# .NET Core runtime https://github.com/dotnet/dotnet-docker/blob/master/2.0/runtime/stretch/Dockerfile
-RUN apt-get update \
-	&& apt-get install -y --no-install-recommends \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
+# Install .NET Core SDK
+ENV DOTNET_SDK_VERSION 2.0.0-preview2-006497
+ENV DOTNET_SDK_DOWNLOAD_URL https://dotnetcli.blob.core.windows.net/dotnet/Sdk/$DOTNET_SDK_VERSION/dotnet-sdk-$DOTNET_SDK_VERSION-linux-x64.tar.gz
+ENV DOTNET_SDK_DOWNLOAD_SHA 0664FE726EB07650D9C036B0E5E6D33AA8B10DB89DADA4A5E85FB5757FD1FAE1570AF0D526484014976761C829B1E55A70EF9966EECE877A56C2C426090896EB
 
-# Install .NET Core
-ENV DOTNET_VERSION 2.0.0-preview2-25407-01
-ENV DOTNET_DOWNLOAD_URL https://dotnetcli.blob.core.windows.net/dotnet/Runtime/$DOTNET_VERSION/dotnet-runtime-$DOTNET_VERSION-linux-x64.tar.gz
-ENV DOTNET_DOWNLOAD_SHA 72AA9ABAE8BC818EEB742AFFB943D6AF33B009F84696E6DE7C5316B8975FCC9B4303CB0B80652727BB1FFEE1A025E0C7A43CFE1771D11FE6DEE2D36B002A7EDC
-
-RUN curl -SL $DOTNET_DOWNLOAD_URL --output dotnet.tar.gz \
-    && echo "$DOTNET_DOWNLOAD_SHA dotnet.tar.gz" | sha512sum -c - \
+RUN curl -SL $DOTNET_SDK_DOWNLOAD_URL --output dotnet.tar.gz \
+    && echo "$DOTNET_SDK_DOWNLOAD_SHA dotnet.tar.gz" | sha512sum -c - \
     && mkdir -p /usr/share/dotnet \
     && tar -zxf dotnet.tar.gz -C /usr/share/dotnet \
     && rm dotnet.tar.gz \
     && ln -s /usr/share/dotnet/dotnet /usr/bin/dotnet
+
+# Trigger the population of the local package cache
+ENV NUGET_XMLDOC_MODE skip
+RUN mkdir warmup \
+    && cd warmup \
+    && dotnet new \
+    && cd .. \
+    && rm -rf warmup \
+    && rm -rf /tmp/NuGetScratch
