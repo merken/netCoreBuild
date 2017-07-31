@@ -27,7 +27,7 @@ def cloneRepo() {
 }
 
 def dotnet_build(){
-	ws('netcore') {
-		sh(script: 'dotnet build Merken.NetCoreBuild.App/Merken.NetCoreBuild.App.csproj', returnStdout: true)
+	dir('Merken.NetCoreBuild.App') {
+		sh(script: 'dotnet build Merken.NetCoreBuild.App.csproj', returnStdout: true)
 	}
 }
