@@ -1,3 +1,4 @@
+#https://dzone.com/articles/dockerizing-jenkins-2-setup-and-using-it-along-wit
 #this is the base image we use to create our image from
 FROM jenkins:2.60.1
 #just info about who created this
