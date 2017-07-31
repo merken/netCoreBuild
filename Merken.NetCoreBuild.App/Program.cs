@@ -14,7 +14,8 @@ namespace Merken.NetCoreBuild.App
     {
         public static void Main(string[] args)
         {
-            BuildWebHost(args).Run();
+            //break the build
+            BuildWebHost(ardgs).Run();
         }
 
         public static IWebHost BuildWebHost(string[] args) =>
