@@ -2,13 +2,13 @@
 node {
     ws('netcore') {
         try{
-            stage("SCM Commit") {
+            stage("scm pull") {
 				deleteDir()
 				cloneRepo()
             }
             
-            stage ("Tests") {
-
+            stage ("dotnet build") {
+				dotnet_build()
             }
         } 
         catch (InterruptedException x) {
@@ -24,4 +24,10 @@ node {
 
 def cloneRepo() {
     checkout scm
+}
+
+def dotnet_build(){
+	ws('netcore') {
+		sh(script: 'dotnet build Merken.NetCoreBuild.App/Merken.NetCoreBuild.App.csproj', returnStdout: true)
+	}
 }
