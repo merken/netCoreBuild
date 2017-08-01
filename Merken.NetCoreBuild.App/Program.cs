@@ -21,6 +21,7 @@ namespace Merken.NetCoreBuild.App
             WebHost.CreateDefaultBuilder(args)
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseStartup<Startup>()
+                .UseUrls("http://localhost:5000/")
                 .Build();
     }
 }
