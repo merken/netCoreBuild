@@ -21,8 +21,11 @@ node {
 
             stage ("deploy app") {
                 dir('Merken.NetCoreBuild.App/bin/Debug/netcoreapp2.0/publish') {
-                    def command = "dotnet Merken.NetCoreBuild.App.dl"
-                    def process = command.execute()
+                    script{
+                        withEnv(['BUILD_ID=dontkill']) {
+                            sh "nohup dotnet Merken.NetCoreBuild.App.dll"
+                        }
+                    }
                 }
             }
         } 
