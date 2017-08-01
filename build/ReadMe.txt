@@ -1,7 +1,7 @@
 #build the image
 docker build . -t netcorebuild:latest
 #run the image
-docker run -p 8080:8080 --rm --name netcorebuild netcorebuild:latest
+docker run -p 8080:8080 -p 5000:5000 --rm --name netcorebuild netcorebuild:latest
 
 #setup the image
 wget http://localhost:8080/jnlpJars/jenkins-cli.jar
