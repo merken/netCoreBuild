@@ -52,12 +52,12 @@ def dotnet_test(){
 
 def dotnet_publish(){
     dir('Merken.NetCoreBuild.App') {
-		sh(script: 'dotnet publish Merken.NetCoreBuild.Test.csproj', returnStdout: true)
+		sh(script: 'dotnet publish Merken.NetCoreBuild.App.csproj', returnStdout: true)
 	}
 }
 
 def deploy_app(){
 	dir('Merken.NetCoreBuild.App/bin/Debug/netcoreapp2.0/publish') {
-		sh(script: 'dotnet Merken.NetCoreBuild.Test.dll', returnStdout: false)
+		sh(script: 'dotnet Merken.NetCoreBuild.App.dll', returnStdout: false)
 	}
 }
