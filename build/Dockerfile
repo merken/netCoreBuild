@@ -1,34 +1,44 @@
 #https://dzone.com/articles/dockerizing-jenkins-2-setup-and-using-it-along-wit
+ARG JENKINS_VERSION=2.60.2
 #this is the base image we use to create our image from
-FROM jenkins:2.60.2
+FROM jenkins:$JENKINS_VERSION
 #just info about who created this
 MAINTAINER Maarten Merken
+
+ARG NET_CORE_APP_NAME=netcorebuild
+ARG JENKINS_CLI_URL=https://repo.jenkins-ci.org/public/org/jenkins-ci/main/cli/$JENKINS_VERSION/cli-$JENKINS_VERSION-jar-with-dependencies.jar
 #get rid of admin password setup
 ENV JAVA_OPTS="-Djenkins.install.runSetupWizard=false"
 ENV JENKINS_HOME /var/jenkins_home
-ENV JENKINS_VERSION 2.60.2
 
+RUN echo "Jenkins version $JENKINS_VERSION"
+RUN echo "App name $NET_CORE_APP_NAME"
+RUN echo "Jenkins CLI $JENKINS_CLI_URL"
+RUN echo "Jenkins home $JENKINS_HOME"
+
+#networking
 EXPOSE 8080
+EXPOSE 8081
 EXPOSE 5000
 EXPOSE 50000
 
-#download jenkins war
-ARG JENKINS_WAR_URL=https://repo.jenkins-ci.org/public/org/jenkins-ci/main/jenkins-war/${JENKINS_VERSION}/jenkins-war-${JENKINS_VERSION}.war
-RUN curl -fsSL ${JENKINS_WAR_URL} -o /usr/share/jenkins/jenkins.war \
-COPY jenkins-cli.jar "$JENKINS_HOME"
+#elevation
+USER root
 
-RUN mkdir -p "$JENKINS_HOME"/jobs/netcorebuild
-COPY netcorebuild.xml "$JENKINS_HOME"/jobs/netcorebuild/config.xml
+#download jenkins cli, 
+RUN echo $JENKINS_CLI_URL
+RUN wget $JENKINS_CLI_URL -O jenkins-cli.jar
+
+RUN mkdir -p "$JENKINS_HOME"/jobs/"$NET_CORE_APP_NAME"
+COPY "$NET_CORE_APP_NAME".xml "$JENKINS_HOME"/jobs/"$NET_CORE_APP_NAME"/config.xml
 
 # could use ADD but this one does not check Last-Modified header neither does it allow to control checksum
 # see https://github.com/docker/docker/issues/8331
 #automatically installing all plugins
-COPY plugins.txt /usr/share/jenkins/ref/plugins.txt 
-COPY pipelineTemplate.xml /usr/share/jenkins/ref/pipelineTemplate.xml
-RUN /usr/local/bin/install-plugins.sh bouncycastle-api cloudbees-folder structs junit antisamy-markup-formatter pam-auth windows-slaves display-url-api mailer ldap token-macro external-monitor-job icon-shim matrix-auth script-security matrix-project build-timeout credentials workflow-step-api plain-credentials credentials-binding timestamper scm-api workflow-api workflow-support durable-task workflow-durable-task-step resource-disposer ws-cleanup pipeline-milestone-step jquery-detached ace-editor workflow-scm-step workflow-cps pipeline-input-step pipeline-stage-step workflow-job pipeline-graph-analysis pipeline-rest-api handlebars momentjs pipeline-stage-view pipeline-build-step pipeline-model-api pipeline-model-extensions ssh-credentials git-client git-server workflow-cps-global-lib branch-api workflow-multibranch authentication-tokens docker-commons docker-workflow pipeline-stage-tags-metadata pipeline-model-declarative-agent workflow-basic-steps pipeline-model-definition workflow-aggregator jackson2-api github-api git github github-branch-source pipeline-github-lib ssh-slaves javadoc maven-plugin dashboard-view build-name-setter ant run-condition conditional-buildstep parameterized-trigger jquery build-pipeline-plugin xunit
+COPY plugins_.txt /usr/share/jenkins/plugins.txt 
+RUN /usr/local/bin/install-plugins.sh $(cat /usr/share/jenkins/plugins.txt | tr '\n' ' ')
 
 #netcore stuff here
-USER root
 #buildpack-deps stretch:curl https://github.com/docker-library/buildpack-deps/blob/master/stretch/curl/Dockerfile
 RUN apt-get update && apt-get install -y --no-install-recommends \
 		ca-certificates \
