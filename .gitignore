@@ -5,3 +5,5 @@ build/Merken.HereYouGo.ABuildServer/bin/
 build/Merken.HereYouGo.ABuildServer/obj/
 Merken.NetCoreBuild.App/bin/
 Merken.NetCoreBuild.App/obj/
+Merken.NetCoreBuild.Test/obj/
+Merken.NetCoreBuild.Test/bin/
