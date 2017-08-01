@@ -21,11 +21,11 @@ node {
 
             stage ("deploy app") {
                 dir('Merken.NetCoreBuild.App/bin/Debug/netcoreapp2.0/publish') {
-                    script{
-                        withEnv(['BUILD_ID=dontkill']) {
-                            sh "nohup dotnet Merken.NetCoreBuild.App.dll"
-                        }
-                    }
+                    // script{
+                    //     withEnv(['BUILD_ID=dontkill']) {
+                    //         sh "nohup dotnet Merken.NetCoreBuild.App.dll"
+                    //     }
+                    // }
                 }
             }
         } 
