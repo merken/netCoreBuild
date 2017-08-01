@@ -20,7 +20,10 @@ node {
             }
 
             stage ("deploy app") {
-				deploy_app()
+                dir('Merken.NetCoreBuild.App/bin/Debug/netcoreapp2.0/publish') {
+                    def command = "dotnet Merken.NetCoreBuild.App.dl"
+                    def process = command.execute()
+                }
             }
         } 
         catch (InterruptedException x) {
