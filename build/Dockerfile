@@ -5,11 +5,29 @@ FROM jenkins:2.60.2
 MAINTAINER Maarten Merken
 #get rid of admin password setup
 ENV JAVA_OPTS="-Djenkins.install.runSetupWizard=false"
+ENV JENKINS_HOME /var/jenkins_home
+ENV JENKINS_VERSION 2.60.2
+
+EXPOSE 8080
+EXPOSE 5000
+EXPOSE 50000
+
+#download jenkins war
+ARG JENKINS_WAR_URL=https://repo.jenkins-ci.org/public/org/jenkins-ci/main/jenkins-war/${JENKINS_VERSION}/jenkins-war-${JENKINS_VERSION}.war
+RUN curl -fsSL ${JENKINS_WAR_URL} -o /usr/share/jenkins/jenkins.war \
+COPY jenkins-cli.jar "$JENKINS_HOME"
+
+RUN mkdir -p "$JENKINS_HOME"/jobs/netcorebuild
+COPY netcorebuild.xml "$JENKINS_HOME"/jobs/netcorebuild/config.xml
+
+# could use ADD but this one does not check Last-Modified header neither does it allow to control checksum
+# see https://github.com/docker/docker/issues/8331
 #automatically installing all plugins
 COPY plugins.txt /usr/share/jenkins/ref/plugins.txt 
 COPY pipelineTemplate.xml /usr/share/jenkins/ref/pipelineTemplate.xml
 RUN /usr/local/bin/install-plugins.sh bouncycastle-api cloudbees-folder structs junit antisamy-markup-formatter pam-auth windows-slaves display-url-api mailer ldap token-macro external-monitor-job icon-shim matrix-auth script-security matrix-project build-timeout credentials workflow-step-api plain-credentials credentials-binding timestamper scm-api workflow-api workflow-support durable-task workflow-durable-task-step resource-disposer ws-cleanup pipeline-milestone-step jquery-detached ace-editor workflow-scm-step workflow-cps pipeline-input-step pipeline-stage-step workflow-job pipeline-graph-analysis pipeline-rest-api handlebars momentjs pipeline-stage-view pipeline-build-step pipeline-model-api pipeline-model-extensions ssh-credentials git-client git-server workflow-cps-global-lib branch-api workflow-multibranch authentication-tokens docker-commons docker-workflow pipeline-stage-tags-metadata pipeline-model-declarative-agent workflow-basic-steps pipeline-model-definition workflow-aggregator jackson2-api github-api git github github-branch-source pipeline-github-lib ssh-slaves javadoc maven-plugin dashboard-view build-name-setter ant run-condition conditional-buildstep parameterized-trigger jquery build-pipeline-plugin xunit
 
+#netcore stuff here
 USER root
 #buildpack-deps stretch:curl https://github.com/docker-library/buildpack-deps/blob/master/stretch/curl/Dockerfile
 RUN apt-get update && apt-get install -y --no-install-recommends \
