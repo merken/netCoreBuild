@@ -2,6 +2,7 @@
 ARG JENKINS_VERSION=2.60.2
 #this is the base image we use to create our image from
 FROM jenkins:$JENKINS_VERSION
+LABEL name "netcorebuild"
 #just info about who created this
 MAINTAINER Maarten Merken
 
@@ -10,17 +11,16 @@ ARG JENKINS_CLI_URL=https://repo.jenkins-ci.org/public/org/jenkins-ci/main/cli/$
 #get rid of admin password setup
 ENV JAVA_OPTS="-Djenkins.install.runSetupWizard=false"
 ENV JENKINS_HOME /var/jenkins_home
+ENV ASPNETCORE_URLS http://+:5000
 
 RUN echo "Jenkins version $JENKINS_VERSION"
 RUN echo "App name $NET_CORE_APP_NAME"
 RUN echo "Jenkins CLI $JENKINS_CLI_URL"
 RUN echo "Jenkins home $JENKINS_HOME"
+RUN echo "NETCORE URL $ASPNETCORE_URLS"
 
 #networking
-EXPOSE 8080
-EXPOSE 8081
 EXPOSE 5000
-EXPOSE 50000
 
 #elevation
 USER root
@@ -29,12 +29,11 @@ USER root
 RUN echo $JENKINS_CLI_URL
 RUN wget $JENKINS_CLI_URL -O jenkins-cli.jar
 
+#create the job directory and configuration
 RUN mkdir -p "$JENKINS_HOME"/jobs/"$NET_CORE_APP_NAME"
 COPY "$NET_CORE_APP_NAME".xml "$JENKINS_HOME"/jobs/"$NET_CORE_APP_NAME"/config.xml
 
-# could use ADD but this one does not check Last-Modified header neither does it allow to control checksum
-# see https://github.com/docker/docker/issues/8331
-#automatically installing all plugins
+#automatically installing required plugins
 COPY plugins_.txt /usr/share/jenkins/plugins.txt 
 RUN /usr/local/bin/install-plugins.sh $(cat /usr/share/jenkins/plugins.txt | tr '\n' ' ')
 
