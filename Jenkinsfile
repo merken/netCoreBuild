@@ -58,8 +58,10 @@ def dotnet_publish(){
 
 def deploy_app(){
 	dir('build') {
-		
+		sh(script: 'systemctl stop netcorebuild.service', returnStdout: true)
+		sh(script: 'systemctl disable netcorebuild.service', returnStdout: true)
 		sh(script: 'cp netcorebuild.service /etc/systemd/system/netcorebuild.service', returnStdout: true)
 		sh(script: 'systemctl enable netcorebuild.service', returnStdout: true)
+		sh(script: 'systemctl start netcorebuild.service', returnStdout: true)
 	}
 }
