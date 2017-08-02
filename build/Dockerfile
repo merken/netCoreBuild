@@ -37,6 +37,9 @@ COPY "$NET_CORE_APP_NAME".xml "$JENKINS_HOME"/jobs/"$NET_CORE_APP_NAME"/config.x
 COPY plugins_.txt /usr/share/jenkins/plugins.txt 
 RUN /usr/local/bin/install-plugins.sh $(cat /usr/share/jenkins/plugins.txt | tr '\n' ' ')
 
+#install systemctl replacement to run services on stretch https://github.com/gdraheim/docker-systemctl-replacement
+COPY systemctl.py /usr/bin/systemctl
+
 #netcore stuff here
 #buildpack-deps stretch:curl https://github.com/docker-library/buildpack-deps/blob/master/stretch/curl/Dockerfile
 RUN apt-get update && apt-get install -y --no-install-recommends \
