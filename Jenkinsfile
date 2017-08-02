@@ -20,11 +20,7 @@ node {
             }
 
             stage ("deploy app") {
-                dir('Merken.NetCoreBuild.App/bin/Debug/netcoreapp2.0/publish') {
-                    script{
-                        sh "BUILD_ID=dontKillMe nohup dotnet Merken.NetCoreBuild.App.dll &"
-                    }
-                }
+                deploy_app()
             }
         } 
         catch (InterruptedException x) {
