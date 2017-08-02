@@ -47,8 +47,6 @@ def dotnet_test(){
 }
 
 def dotnet_publish(){
-
-    sh 'whoami'
     def netcorebuildSericeExists = fileExists '/etc/systemd/system/netcorebuild.service'
 
     if (netcorebuildSericeExists) {
@@ -65,13 +63,8 @@ def dotnet_publish(){
     }
 
     sh(script: 'systemctl enable netcorebuild.service', returnStdout: true)
+
     dir('build') {
         sh(script: 'sudo bash netcorebuild.sh', returnStdout: true)
     }
-    
-    // dir('build') {
-    //     sh 'BUILD_ID=dontKillMe sudo bash netcorebuild.sh'
-    // }
-    //sh(script: 'systemctl start netcorebuild.service', returnStdout: true)
-    //sh(script: 'sleep 120', returnStdout: true)
 }
