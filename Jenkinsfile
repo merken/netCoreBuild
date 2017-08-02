@@ -53,11 +53,16 @@ def dotnet_publish(){
     dir('Merken.NetCoreBuild.App') {
         sh(script: 'dotnet publish Merken.NetCoreBuild.App.csproj -o /var/netcorebuild/', returnStdout: true)
     }
+    
     dir('build') {
         sh(script: 'cp netcorebuild.service /etc/systemd/system/netcorebuild.service', returnStdout: true)
     }
+
     sh(script: 'systemctl enable netcorebuild.service', returnStdout: true)
-    sh BUILD_ID=dontKillMe ./netcorebuild.sh
+    
+    dir('build') {
+        sh BUILD_ID=dontKillMe ./netcorebuild.sh
+    }
     //sh(script: 'systemctl start netcorebuild.service', returnStdout: true)
     //sh(script: 'sleep 120', returnStdout: true)
 }
