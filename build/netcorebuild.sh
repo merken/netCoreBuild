@@ -1,2 +1,2 @@
 #!/bin/bash
-su systemctl start netcorebuild.service &
+systemctl start netcorebuild.service &
