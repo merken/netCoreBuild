@@ -48,7 +48,7 @@ def dotnet_test(){
 
 def dotnet_publish(){
 
-    sh 'echo whoami'
+    sh 'whoami'
     def netcorebuildSericeExists = fileExists '/etc/systemd/system/netcorebuild.service'
 
     if (netcorebuildSericeExists) {
