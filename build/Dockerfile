@@ -27,7 +27,7 @@ USER root
 
 #install sudo
 RUN apt-get update && apt-get install -y --no-install-recommends \
-		sudo 
+		sudo \
 	&& rm -rf /var/lib/apt/lists/*
 
 #add jenkins user to sudo group
