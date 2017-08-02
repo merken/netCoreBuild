@@ -25,7 +25,15 @@ EXPOSE 5000
 #elevation
 USER root
 
-#download jenkins cli, 
+#install sudo
+RUN apt-get update && apt-get install -y --no-install-recommends \
+		sudo 
+	&& rm -rf /var/lib/apt/lists/*
+
+#add jenkins user to sudo group
+RUN adduser jenkins sudo
+
+#download jenkins cli
 RUN echo $JENKINS_CLI_URL
 RUN wget $JENKINS_CLI_URL -O jenkins-cli.jar
 
@@ -39,6 +47,14 @@ RUN /usr/local/bin/install-plugins.sh $(cat /usr/share/jenkins/plugins.txt | tr 
 
 #install systemctl replacement to run services on stretch https://github.com/gdraheim/docker-systemctl-replacement
 COPY systemctl.py /usr/bin/systemctl
+
+#add jenkins to the root user group
+#RUN usermod -a -G root jenkins
+RUN apt-get update && apt-get install -y --no-install-recommends \
+		ca-certificates \
+		curl \
+		wget \
+	&& rm -rf /var/lib/apt/lists/*
 
 #netcore stuff here
 #buildpack-deps stretch:curl https://github.com/docker-library/buildpack-deps/blob/master/stretch/curl/Dockerfile
