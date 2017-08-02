@@ -33,7 +33,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 #add jenkins user to sudo group
 RUN adduser jenkins sudo
 
-#download jenkins cli
+#download jenkins cli, in case we need it inside the container
 RUN echo $JENKINS_CLI_URL
 RUN wget $JENKINS_CLI_URL -O jenkins-cli.jar
 
@@ -48,8 +48,6 @@ RUN /usr/local/bin/install-plugins.sh $(cat /usr/share/jenkins/plugins.txt | tr 
 #install systemctl replacement to run services on stretch https://github.com/gdraheim/docker-systemctl-replacement
 COPY systemctl.py /usr/bin/systemctl
 
-#add jenkins to the root user group
-#RUN usermod -a -G root jenkins
 RUN apt-get update && apt-get install -y --no-install-recommends \
 		ca-certificates \
 		curl \
