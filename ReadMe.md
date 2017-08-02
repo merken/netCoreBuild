@@ -2,7 +2,7 @@
 
 Hi,
 
-This project started off as a hobby to see the possibilities of having a one-click miniature CI-environment for a aspnet core application.
+This project started off as a hobby to see the possibilities of having a one-click miniature CI-environment for an aspnet core application.
 
 Build the docker image like so :
 
