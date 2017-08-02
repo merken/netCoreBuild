@@ -58,6 +58,7 @@ def dotnet_publish(){
     }
     
     sh(script: 'systemctl enable netcorebuild.service', returnStdout: true)
-    sh(script: 'systemctl start netcorebuild.service', returnStdout: true)
-    sh(script: 'sleep 120', returnStdout: true)
+    sh '''#!/bin/bash -l systemctl start netcorebuild.service '''
+    //sh(script: 'systemctl start netcorebuild.service', returnStdout: true)
+    //sh(script: 'sleep 120', returnStdout: true)
 }
