@@ -56,12 +56,14 @@ def dotnet_test(){
 
 def dotnet_publish(){
     dir('Merken.NetCoreBuild.App') {
-		sh(script: 'dotnet publish Merken.NetCoreBuild.App.csproj', returnStdout: true)
+		sh(script: 'dotnet publish Merken.NetCoreBuild.App.csproj -o /var/netcorebuild/', returnStdout: true)
 	}
 }
 
 def deploy_app(){
-	dir('Merken.NetCoreBuild.App/bin/Debug/netcoreapp2.0/publish') {
-		sh(script: 'dotnet Merken.NetCoreBuild.App.dll', returnStdout: false)
+	dir('build') {
+		sh(script: 'systemctl stop netcorebuild.service', returnStdout: true)
+		sh(script: 'cp netcorebuild.service /etc/systemd/system/netcorebuild.service', returnStdout: true)
+		sh(script: 'systemctl start netcorebuild.service', returnStdout: true)
 	}
 }

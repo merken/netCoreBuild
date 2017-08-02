@@ -1,0 +1,14 @@
+[Unit]
+Description=netcorebuild running on Ubuntu
+
+[Service]
+WorkingDirectory=/var/netcorebuild
+ExecStart=/usr/bin/dotnet /var/netcorebuild/Merken.NetCoreBuild.App.dll
+Restart=always
+RestartSec=10  # Restart service after 10 seconds if dotnet service crashes
+SyslogIdentifier=netcorebuild
+User=root
+Environment=ASPNETCORE_ENVIRONMENT=Production 
+
+[Install]
+WantedBy=multi-user.target
