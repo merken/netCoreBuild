@@ -62,6 +62,8 @@ def deploy_app(){
 		sh(script: 'systemctl disable netcorebuild.service', returnStdout: true)
 		sh(script: 'cp netcorebuild.service /etc/systemd/system/netcorebuild.service', returnStdout: true)
 		sh(script: 'systemctl enable netcorebuild.service', returnStdout: true)
-		sh(script: 'systemctl start netcorebuild.service', returnStdout: true)
+        script{
+            sh "BUILD_ID=dontKillMe nohup systemctl start netcorebuild.service &"
+        }
 	}
 }
