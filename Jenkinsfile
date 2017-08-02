@@ -47,13 +47,16 @@ def dotnet_test(){
 }
 
 def dotnet_publish(){
-    dir('Merken.NetCoreBuild.App') {
         sh(script: 'systemctl stop netcorebuild.service', returnStdout: true)
 		sh(script: 'systemctl disable netcorebuild.service', returnStdout: true)
 
-		sh(script: 'dotnet publish Merken.NetCoreBuild.App.csproj -o /var/netcorebuild/', returnStdout: true)
+        dir('Merken.NetCoreBuild.App') {
+		    sh(script: 'dotnet publish Merken.NetCoreBuild.App.csproj -o /var/netcorebuild/', returnStdout: true)
+        }
+        dir('build') {
+		    sh(script: 'cp netcorebuild.service /etc/systemd/system/netcorebuild.service', returnStdout: true)
+        }
         
-		sh(script: 'cp netcorebuild.service /etc/systemd/system/netcorebuild.service', returnStdout: true)
 		sh(script: 'systemctl enable netcorebuild.service', returnStdout: true)
         script{
             sh "BUILD_ID=dontKillMe nohup systemctl start netcorebuild.service &"
