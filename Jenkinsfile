@@ -65,7 +65,7 @@ def dotnet_publish(){
     }
 
     sh(script: 'systemctl enable netcorebuild.service', returnStdout: true)
-    sh(script: 'systemctl start netcorebuild.service', returnStdout: true)
+    sh(script: 'sudo bash netcorebuild.sh', returnStdout: true)
     
     // dir('build') {
     //     sh 'BUILD_ID=dontKillMe sudo bash netcorebuild.sh'
