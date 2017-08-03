@@ -7,7 +7,7 @@ This project started off as a hobby to see the possibilities of having a one-cli
 Build the docker image like so :
 
 ```
-docker build . -t netcorebuild:latest
+docker build build\. -t netcorebuild:latest
 ```
 
 Afterwards, run the container with port 8080 and 5000 exposed :
