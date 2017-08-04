@@ -76,7 +76,7 @@ def docker_run(){
         sh(script: 'curl -v -X POST -H "Content-Type:application/json" --unix-socket /var/run/docker.sock http://0.0.0.0:2375/containers/prune', returnStdout: true)
         sh(script: 'curl -v -X DELETE -H "Content-Type:application/json" --unix-socket /var/run/docker.sock http://0.0.0.0:2375/images/netcoreapp', returnStdout: true)
 
-        sh(script: 'curl -v -X POST -H "Content-Type:application/json" --unix-socket /var/run/docker.sock -d @imageconf http://0.0.0.0:2375/containers/create?name=netcoreapp', returnStdout: true)
-        sh(script: 'curl -v -X POST -H "Content-Type:application/json" --unix-socket /var/run/docker.sock http://0.0.0.0:2375/containers/netcoreapp/start', returnStdout: true)
+        // sh(script: 'curl -v -X POST -H "Content-Type:application/json" --unix-socket /var/run/docker.sock -d @imageconf http://0.0.0.0:2375/containers/create?name=netcoreapp', returnStdout: true)
+        // sh(script: 'curl -v -X POST -H "Content-Type:application/json" --unix-socket /var/run/docker.sock http://0.0.0.0:2375/containers/netcoreapp/start', returnStdout: true)
     }
 }
