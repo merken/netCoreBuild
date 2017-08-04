@@ -62,6 +62,7 @@ def dotnet_publish(){
         sh(script: 'cp netcorebuild.service /etc/systemd/system/netcorebuild.service', returnStdout: true)
     }
 
+    sh(script: 'whoami', returnStdout: true)
     sh(script: 'systemctl enable netcorebuild.service', returnStdout: true)
 
     dir('build') {
