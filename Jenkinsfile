@@ -70,7 +70,10 @@ def docker_build(){
 
 def docker_run(){
     dir('Merken.NetCoreBuild.App') {
-        sh(script: 'curl -v -X POST -H "Content-Type: application/json" --unix-socket /var/run/docker.sock -d \'{"Image": " netcoreapp:latest",}\' http://0.0.0.0:2375/containers/create?name=netcoreapp', returnStdout: true)
-        sh(script: 'curl -v -X POST -H "Content-Type: application/json" --unix-socket /var/run/docker.sock -d \'{"PortBindings": { "5000/tcp": [{ "HostPort": "5000" }] },"RestartPolicy": { "Name": "always",},}\' http://0.0.0.0:2375/containers/registry/start?name=netcoreapp', returnStdout: true)
+        sh(script:'echo -e "{\"Image\":\"netcoreapp:latest\",}" > imageconf', returnStdout: true)
+        sh(script:'echo -e "{\"PortBindings\": { \"5000/tcp\": [{ \"HostPort": \"5000\" }] },}" > startconf', returnStdout: true)
+
+        sh(script: 'curl -v -X POST -H "Content-Type:application/json" --unix-socket /var/run/docker.sock -d @imageconf http://0.0.0.0:2375/containers/create?name=netcoreapp', returnStdout: true)
+        sh(script: 'curl -v -X POST -H "Content-Type:application/json" --unix-socket /var/run/docker.sock -d @startconf http://0.0.0.0:2375/containers/registry/start?name=netcoreapp', returnStdout: true)
     }
 }
