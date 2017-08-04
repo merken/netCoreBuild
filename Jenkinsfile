@@ -18,6 +18,14 @@ node {
             stage ("dotnet publish") {
 				dotnet_publish()
             }
+
+            stage ("docker build") {
+				docker_build()
+            }
+
+            stage ("docker run") {
+				docker_run()
+            }
         } 
         catch (InterruptedException x) {
             currentBuild.result = 'ABORTED'
@@ -48,12 +56,21 @@ def dotnet_test(){
 
 def dotnet_publish(){
     dir('Merken.NetCoreBuild.App') {
-        sh('echo publishing')
         sh(script: 'dotnet publish Merken.NetCoreBuild.App.csproj -o ./obj/Docker/publish', returnStdout: true)
         sh(script: 'cp Dockerfile ./obj/Docker/publish', returnStdout: true)
-        sh('echo zipping')
         sh(script: 'tar zcf netcoreapp.tar.gz -C ./obj/Docker/publish .', returnStdout: true)
-        sh('echo building')
-        sh(script: 'curl -v -X POST -H "Content-Type:application/tar" --data-binary @netcoreapp.tar.gz --unix-socket /var/run/docker.sock http://0.0.0.0:2375/build?t=sample', returnStdout: true)
+    }
+}
+
+def docker_build(){
+    dir('Merken.NetCoreBuild.App') {
+        sh(script: 'curl -v -X POST -H "Content-Type:application/tar" --data-binary @netcoreapp.tar.gz --unix-socket /var/run/docker.sock http://0.0.0.0:2375/build?t=netcoreapp&nocache=true', returnStdout: true)
+    }
+}
+
+def docker_run(){
+    dir('Merken.NetCoreBuild.App') {
+        sh(script: 'curl -v -X POST -H "Content-Type: application/json" -d \'{"Image": " netcoreapp:latest",}\' http://0.0.0.0:2375/containers/create?name=netcoreapp', returnStdout: true)
+        sh(script: 'curl -v -X POST -H "Content-Type: application/json" -d \'{"PortBindings": { "5000/tcp": [{ "HostPort": "5000" }] },"RestartPolicy": { "Name": "always",},}\' http://0.0.0.0:2375/containers/registry/start?name=netcoreapp', returnStdout: true)
     }
 }
