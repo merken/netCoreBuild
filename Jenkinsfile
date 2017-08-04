@@ -54,6 +54,6 @@ def dotnet_publish(){
         sh('echo zipping')
         sh(script: 'tar zcf netcoreapp.tar.gz -C ./obj/Docker/publish .', returnStdout: true)
         sh('echo building')
-        sh(script: 'curl -v -X POST -H "Content-Type:application/tar" --data-binary ''@netcoreapp.tar.gz'' --unix-socket /var/run/docker.sock http:/build?t=sample', returnStdout: true)
+        sh(script: 'curl -v -X POST -H "Content-Type:application/tar" --data-binary netcoreapp.tar.gz --unix-socket /var/run/docker.sock http:/build?t=sample', returnStdout: true)
     }
 }
