@@ -1,7 +1,7 @@
 #build the image
 docker build . -t netcorebuild:latest
 #run the image
-docker run -p 8080:8080 -p 5000:5000 --name netcorebuild netcorebuild:latest
+docker run -p 8080:8080 -v /var/run/docker.sock:/var/run/docker.sock -v /e/jenkins_home:/var/jenkins_home --name netcorebuild netcorebuild:latest
 #enter the image
 docker exec -it netcorebuild bash
 
