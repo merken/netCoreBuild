@@ -1,5 +1,5 @@
 FROM microsoft/dotnet:2.0.0-preview2-runtime-stretch
-
+LABEL netcoreapp
 # set up network
 ENV ASPNETCORE_URLS http://+:5000
 WORKDIR /app
