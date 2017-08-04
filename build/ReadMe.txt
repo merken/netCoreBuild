@@ -4,13 +4,3 @@ docker build . -t netcorebuild:latest
 docker run -p 8080:8080 -v /var/run/docker.sock:/var/run/docker.sock --name netcorebuild netcorebuild:latest
 #enter the image
 docker exec -it netcorebuild bash
-
-#setup the image
-wget http://localhost:8080/jnlpJars/jenkins-cli.jar
-java -jar jenkins-cli.jar -s http://localhost:8080 who-am-i
-java -jar jenkins-cli.jar -s http://localhost:8080 create-job netcorebuild < /usr/share/jenkins/ref/pipelineTemplate.xml
-
-#test the image
-dotnet build /var/jenkins_home/workspace/netcorebuild@script/Merken.NetCoreBuild.App/Merken.NetCoreBuild.App.csproj
-dotnet publish /var/jenkins_home/workspace/netcorebuild@script/Merken.NetCoreBuild.App/Merken.NetCoreBuild.App.csproj
-dotnet /var/jenkins_home/workspace/netcorebuild@script/Merken.NetCoreBuild.App/bin/Debug/netcoreapp2.0/publish/Merken.NetCoreBuild.App.dll
