@@ -47,14 +47,6 @@ def dotnet_test(){
 }
 
 def dotnet_publish(){
-    sh('whoami')
-    def netcorebuildSericeExists = fileExists '/etc/systemd/system/netcorebuild.service'
-
-    if (netcorebuildSericeExists) {
-        sh(script: 'systemctl stop netcorebuild.service', returnStdout: true)
-        sh(script: 'systemctl disable netcorebuild.service', returnStdout: true)
-    } 
-
     dir('Merken.NetCoreBuild.App') {
         sh(script: 'dotnet publish Merken.NetCoreBuild.App.csproj -o /var/netcorebuild/', returnStdout: true)
     }
