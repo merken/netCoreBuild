@@ -11,7 +11,6 @@ ARG JENKINS_CLI_URL=https://repo.jenkins-ci.org/public/org/jenkins-ci/main/cli/$
 #get rid of admin password setup
 ENV JAVA_OPTS="-Djenkins.install.runSetupWizard=false"
 ENV JENKINS_HOME /var/jenkins_home
-ENV ASPNETCORE_URLS http://+:5000
 
 RUN echo "Jenkins version $JENKINS_VERSION"
 RUN echo "App name $NET_CORE_APP_NAME"
@@ -20,7 +19,7 @@ RUN echo "Jenkins home $JENKINS_HOME"
 RUN echo "NETCORE URL $ASPNETCORE_URLS"
 
 #networking
-EXPOSE 5000
+EXPOSE 8080
 
 #elevation
 USER root

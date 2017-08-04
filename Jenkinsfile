@@ -48,16 +48,12 @@ def dotnet_test(){
 
 def dotnet_publish(){
     dir('Merken.NetCoreBuild.App') {
-        sh(script: 'dotnet publish Merken.NetCoreBuild.App.csproj -o /var/netcorebuild/', returnStdout: true)
-    }
-
-    dir('build') {
-        sh(script: 'cp netcorebuild.service /etc/systemd/system/netcorebuild.service', returnStdout: true)
-    }
-
-    sh(script: 'systemctl enable netcorebuild.service', returnStdout: true)
-
-    dir('build') {
-        sh(script: 'sudo bash netcorebuild.sh', returnStdout: true)
+        sh('echo publishing')
+        sh(script: 'dotnet publish Merken.NetCoreBuild.App.csproj -o ./obj/Docker/publish', returnStdout: true)
+        sh(script: 'cp Dockerfile ./obj/Docker/publish', returnStdout: true)
+        sh('echo zipping')
+        sh(script: 'tar zcf netcoreapp.tar.gz ./obj/Docker/publish', returnStdout: true)
+        sh('echo building')
+        sh(script: 'curl -v -X POST -H "Content-Type:application/tar" --data-binary \'@netcoreapp.tar.gz\' --unix-socket /var/run/docker.sock http:/build?t=sample', returnStdout: true)
     }
 }
