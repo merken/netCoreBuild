@@ -86,7 +86,7 @@ def docker_run(){
 
 //Generates a version number
 def determineVersionNumber() {
-    def out = bat returnStdout: true, script: 'git rev-list --count HEAD'
+    def out = sh(script: 'git rev-list --count HEAD', returnStdout: true)
     def array = out.split("\\r?\\n")
     def count = array[array.length - 1]
 
