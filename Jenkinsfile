@@ -81,7 +81,7 @@ def docker_run(){
     dir('Merken.NetCoreBuild.App') {
         sh('echo \'{ "Image": "netcoreapp:' + VERSION_NUMBER + '", "ExposedPorts": { "5000/tcp" : {} }, "HostConfig": { "PortBindings": { "5000/tcp": [{ "HostPort": "5000" }] } } }\' > imageconf')
       
-        def response = restRequest('curl -v -X POST -H "Content-Type:application/json" -i -H "Accept: application/json" --unix-socket /var/run/docker.sock -d @imageconf http://0.0.0.0:2375/containers/create')
+        def response = restRequest('curl -X POST -H "Content-Type:application/json" -H "Accept: application/json" --unix-socket /var/run/docker.sock -d @imageconf http://0.0.0.0:2375/containers/create')
         def containerId = response.id;
         sh "echo container id: $response.id"
         //sh(script: 'curl -v -X POST -H "Content-Type:application/json" -i -H "Accept: application/json" --unix-socket /var/run/docker.sock -d @imageconf http://0.0.0.0:2375/containers/create', returnStdout: true)
@@ -101,10 +101,10 @@ def determineVersionNumber() {
 }
 
 def restRequest(request){
-    sh "${request} -o restResponse.json"
+    def response = sh "${request}"
 
     def jsonSlurper = new JsonSlurper()
-    def json = jsonSlurper.parseText(new File("restResponse.json").text)
+    def json = jsonSlurper.parseText(response)
     println json.toString()
 
     return json;
