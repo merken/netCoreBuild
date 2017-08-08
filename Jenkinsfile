@@ -102,6 +102,7 @@ def determineVersionNumber() {
 
 def restRequest(request){
     def response = sh "${request}"
+    sh "echo respoense: $response"
 
     def jsonSlurper = new JsonSlurper()
     def json = jsonSlurper.parseText(response)
