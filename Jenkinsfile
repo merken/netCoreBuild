@@ -1,3 +1,5 @@
+VERSION_NUMBER = ""
+
 /** Pipeline **/
 node {
     ws('netcore') {
@@ -5,6 +7,7 @@ node {
             stage("scm pull") {
 				deleteDir()
 				cloneRepo()
+                determineVersionNumber()
             }
             
             stage ("dotnet build") {
@@ -68,7 +71,7 @@ def docker_build(){
         sh(script: 'curl -v -X POST -H "Content-Type:application/json" --unix-socket /var/run/docker.sock http://0.0.0.0:2375/containers/prune', returnStdout: true)
         sh(script: 'curl -v -X DELETE -H "Content-Type:application/json" --unix-socket /var/run/docker.sock http://0.0.0.0:2375/images/netcoreapp', returnStdout: true)
 
-        sh(script: 'curl -v -X POST -H "Content-Type:application/x-tar" --data-binary @netcoreapp.tar.gz --dump-header - --no-buffer --unix-socket /var/run/docker.sock "http://0.0.0.0:2375/build?t=netcoreapp&nocache=1&rm=1"', returnStdout: true)
+        sh(script: 'curl -v -X POST -H "Content-Type:application/x-tar" --data-binary @netcoreapp.tar.gz --dump-header - --no-buffer --unix-socket /var/run/docker.sock "http://0.0.0.0:2375/build?t=netcoreapp:$VERSION_NUMBER&nocache=1&rm=1"', returnStdout: true)
     }
 }
 
@@ -79,4 +82,15 @@ def docker_run(){
         sh(script: 'curl -v -X POST -H "Content-Type:application/json" --unix-socket /var/run/docker.sock -d @imageconf http://0.0.0.0:2375/containers/create', returnStdout: true)
         sh(script: 'curl -v -X POST -H "Content-Type:application/json" --unix-socket /var/run/docker.sock http://0.0.0.0:2375/containers/netcoreapp/start', returnStdout: true)
     }
+}
+
+//Generates a version number
+def determineVersionNumber() {
+    def out = bat returnStdout: true, script: 'git rev-list --count HEAD'
+    def array = out.split("\\r?\\n")
+    def count = array[array.length - 1]
+
+    VERSION_NUMBER = count.trim()
+    println "Use version $VERSION_NUMBER"
+    currentBuild.displayName = "$VERSION_NUMBER"
 }
