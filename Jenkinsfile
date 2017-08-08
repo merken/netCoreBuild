@@ -68,7 +68,7 @@ def docker_build(){
         sh(script: 'curl -v -X POST -H "Content-Type:application/json" --unix-socket /var/run/docker.sock http://0.0.0.0:2375/containers/prune', returnStdout: true)
         sh(script: 'curl -v -X DELETE -H "Content-Type:application/json" --unix-socket /var/run/docker.sock http://0.0.0.0:2375/images/netcoreapp', returnStdout: true)
 
-        sh(script: 'curl -v -X POST -H "Content-Type:application/x-tar" --data-binary @netcoreapp.tar.gz --dump-header - --no-buffer --unix-socket /var/run/docker.sock http://0.0.0.0:2375/build', returnStdout: true)
+        sh(script: 'curl -v -X POST -H "Content-Type:application/x-tar" --data-binary @netcoreapp.tar.gz --dump-header - --no-buffer --unix-socket /var/run/docker.sock "http://0.0.0.0:2375/build?t=netcoreapp&nocache=1&rm=1"', returnStdout: true)
     }
 }
 
