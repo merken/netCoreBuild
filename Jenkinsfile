@@ -87,16 +87,28 @@ def docker_build(){
 
 def docker_run(){
     dir('Merken.NetCoreBuild.App') {
-        sh('echo \'{ "Image": "netcoreapp:' + VERSION_NUMBER + '", "ExposedPorts": { "5000/tcp" : {} }, "HostConfig": { "PortBindings": { "5000/tcp": [{ "HostPort": "5000" }] } } }\' > imageconf')
-
-        def createResponse = dockerApiRequest('containers/create', 'POST', 'json', 'json', '@imageconf')
-        def containerId = createResponse.Id
-
-        //dockerApiRequest('containers/' + containerId + '/rename?name=netcoreapp', 'POST')
-        dockerApiRequest('containers/netcoreapp/start', 'POST')
-    println 'finished runnn: '
-        
+        def containerId = createContainer();
+        renameContainer(containerId);
+        startContainer();
     }
+}
+
+def createContainer(){
+    sh('echo \'{ "Image": "netcoreapp:' + VERSION_NUMBER + '", "ExposedPorts": { "5000/tcp" : {} }, "HostConfig": { "PortBindings": { "5000/tcp": [{ "HostPort": "5000" }] } } }\' > imageconf');
+
+    def createResponse = dockerApiRequest('containers/create', 'POST', 'json', 'json', '@imageconf');
+    def containerId = createResponse.Id;
+    dockerApiRequest('containers/' + containerId + '/rename?name=netcoreapp', 'POST');
+
+    return containerId;
+}
+
+def renameContainer(containerId){
+    dockerApiRequest('containers/' + containerId + '/rename?name=netcoreapp', 'POST');
+}
+
+def startContainer(){
+    dockerApiRequest('containers/netcoreapp/start', 'POST');
 }
 
 //Generates a version number
