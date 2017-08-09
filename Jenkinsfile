@@ -89,6 +89,8 @@ def docker_run(){
         sh('echo \'{ "Image": "netcoreapp:' + VERSION_NUMBER + '", "ExposedPorts": { "5000/tcp" : {} }, "HostConfig": { "PortBindings": { "5000/tcp": [{ "HostPort": "5000" }] } } }\' > imageconf')
 
         def createResponse = dockerApiRequest('containers/create', 'POST', 'json', 'json', '@imageconf')
+                println "Use response $createResponse"
+        
         sh 'echo $createResponse'
         sh 'echo $createResponse.Id'
         sh 'echo $createResponse.id'
