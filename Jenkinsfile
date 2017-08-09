@@ -32,6 +32,7 @@ node {
 
             stage ("docker run") {
 				docker_run()
+                printl "finished"
             }
         }
         catch (InterruptedException x) {
@@ -93,6 +94,8 @@ def docker_run(){
 
         //dockerApiRequest('containers/' + containerId + '/rename?name=netcoreapp', 'POST')
         dockerApiRequest('containers/netcoreapp/start', 'POST')
+    println 'finished runnn: '
+        
     }
 }
 
@@ -133,12 +136,15 @@ def dockerApiRequest(request, method, contenttype = 'json', accept = '', data = 
     println 'Running curl: ' +  requestBuilder
 
     def response = sh(script: requestBuilder, returnStdout:true)
+    println 'finished curl: '
 
     if(accept == 'json'){
+        println 'finished curdddddl: '
         def jsonSlurper = new JsonSlurper()
         def json = jsonSlurper.parseText(response)
         return json;
     }
+    println 'finished ceeeeeerl: '
 
     return null;
 }
