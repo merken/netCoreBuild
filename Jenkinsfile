@@ -90,7 +90,6 @@ def docker_run(){
 
         def createResponse = dockerApiRequest('containers/create', 'POST', 'json', 'json', '@imageconf')
         def containerId = createResponse.Id
-        println 'containers/' + containerId + '/rename?name=netcoreapp'
 
         dockerApiRequest('containers/' + containerId + '/rename?name=netcoreapp', 'POST')
         dockerApiRequest('containers/netcoreapp/start', 'POST')
@@ -141,6 +140,8 @@ def dockerApiRequest(request, method, contenttype = 'json', accept = '', data = 
             requestBuilder += ' -d ' + data
         }
     }
+
+    println 'Running curl: ' +  requestBuilder
 
     def response = sh(script: requestBuilder, returnStdout:true)
 
