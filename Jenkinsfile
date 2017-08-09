@@ -147,11 +147,13 @@ def dockerApiRequest(request, method, contenttype = 'json', accept = '', data = 
     }
 
     def response = sh(script: requestBuilder, returnStdout:true)
+    println response
 
     if(accept == 'json'){
         def jsonSlurper = new JsonSlurper()
         def json = jsonSlurper.parseText(response)
         println json.toString()
+        println json.Id
         return json;
     }
 
