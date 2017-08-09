@@ -98,7 +98,6 @@ def createContainer(){
 
     def createResponse = dockerApiRequest('containers/create', 'POST', 'json', 'json', '@imageconf');
     def containerId = createResponse.Id;
-    dockerApiRequest('containers/' + containerId + '/rename?name=netcoreapp', 'POST');
 
     return containerId;
 }
