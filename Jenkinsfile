@@ -74,7 +74,7 @@ def docker_build(){
         dockerApiRequest('containers/netcoreapp/stop', 'POST', 'json', '', )
         dockerApiRequest('containers/prune', 'POST', 'json')
         dockerApiRequest('images/netcoreapp', 'DELETE', 'json')
-        dockerApiRequest('build?t=netcoreapp:' + VERSION_NUMBER + '&nocache=1&rm=1"', 'POST', 'tar','', '@netcoreapp.tar.gz', true)
+        dockerApiRequest('build?t=netcoreapp:' + VERSION_NUMBER + '&nocache=1&rm=1', 'POST', 'tar','', '@netcoreapp.tar.gz', true)
 
         //sh(script: 'curl -v -X POST -H "Content-Type:application/json" --unix-socket /var/run/docker.sock http://0.0.0.0:2375/containers/netcoreapp/stop', returnStdout: true)
         //sh(script: 'curl -v -X POST -H "Content-Type:application/json" --unix-socket /var/run/docker.sock http://0.0.0.0:2375/containers/prune', returnStdout: true)
