@@ -71,9 +71,9 @@ def dotnet_publish(){
 
 def docker_build(){
     dir('Merken.NetCoreBuild.App') {
-        dockerApiRequest('containers/netcoreapp/stop', 'POST', 'json', '', )
-        dockerApiRequest('containers/prune', 'POST', 'json')
-        dockerApiRequest('images/netcoreapp', 'DELETE', 'json')
+        dockerApiRequest('containers/netcoreapp/stop', 'POST')
+        dockerApiRequest('containers/prune', 'POST')
+        dockerApiRequest('images/netcoreapp', 'DELETE')
         dockerApiRequest('build?t=netcoreapp:' + VERSION_NUMBER + '&nocache=1&rm=1', 'POST', 'tar','', '@netcoreapp.tar.gz', true)
 
         //sh(script: 'curl -v -X POST -H "Content-Type:application/json" --unix-socket /var/run/docker.sock http://0.0.0.0:2375/containers/netcoreapp/stop', returnStdout: true)
@@ -90,10 +90,10 @@ def docker_run(){
 
         def createResponse = dockerApiRequest('containers/create', 'POST', 'json', 'json', '@imageconf')
         def containerId = createResponse.Id
-        println 'test ' + containerId 
+        println 'containers/' + containerId + '/rename?name=netcoreapp'
 
-        //dockerApiRequest('containers/' + containerId + '/rename/?name=netcoreapp', 'POST', 'json')
-        //dockerApiRequest('containers/netcoreapp/start', 'POST', 'json')
+        dockerApiRequest('containers/' + containerId + '/rename?name=netcoreapp', 'POST')
+        dockerApiRequest('containers/netcoreapp/start', 'POST')
 
         //def response = sh(script: 'curl -X POST -H "Content-Type:application/json" -H "Accept: application/json" --unix-socket /var/run/docker.sock -d @imageconf http://0.0.0.0:2375/containers/create', returnStdout: true)
         //def containerId = response.id;
