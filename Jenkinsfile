@@ -87,7 +87,7 @@ def docker_run(){
         def jsonSlurper = new JsonSlurper()
         def json = jsonSlurper.parseText(response)
         println json.toString()
-        def containerId = json.id
+        def containerId = json.Id
         sh "echo cosntffffainer id: $containerId"
         //sh(script: 'curl -v -X POST -H "Content-Type:application/json" -i -H "Accept: application/json" --unix-socket /var/run/docker.sock -d @imageconf http://0.0.0.0:2375/containers/create', returnStdout: true)
         sh(script: 'curl -v -X POST -H "Content-Type:application/json" -i -H "Accept: application/json" --unix-socket /var/run/docker.sock http://0.0.0.0:2375/containers/netcoreapp/start', returnStdout: true)
