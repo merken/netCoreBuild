@@ -11,7 +11,7 @@ node {
 				cloneRepo()
                 determineVersionNumber()
             }
-            
+
             stage ("dotnet build") {
 				dotnet_build()
             }
@@ -31,7 +31,7 @@ node {
             stage ("docker run") {
 				docker_run()
             }
-        } 
+        }
         catch (InterruptedException x) {
             currentBuild.result = 'ABORTED'
             throw x
@@ -80,10 +80,10 @@ def docker_build(){
 def docker_run(){
     dir('Merken.NetCoreBuild.App') {
         sh('echo \'{ "Image": "netcoreapp:' + VERSION_NUMBER + '", "ExposedPorts": { "5000/tcp" : {} }, "HostConfig": { "PortBindings": { "5000/tcp": [{ "HostPort": "5000" }] } } }\' > imageconf')
-      
-        def response = restRequest('curl -sb -X POST -H "Content-Type:application/json" -H "Accept: application/json" --unix-socket /var/run/docker.sock -d @imageconf http://0.0.0.0:2375/containers/create')
-        def containerId = response.id;
-        sh "echo container id: $response.id"
+
+        def response = sh(script: 'curl -X POST -H "Content-Type:application/json" -H "Accept: application/json" --unix-socket /var/run/docker.sock -d @imageconf http://0.0.0.0:2375/containers/create', returnStdout: true)
+        //def containerId = response.id;
+        sh "echo cosntainer id: $response"
         //sh(script: 'curl -v -X POST -H "Content-Type:application/json" -i -H "Accept: application/json" --unix-socket /var/run/docker.sock -d @imageconf http://0.0.0.0:2375/containers/create', returnStdout: true)
         sh(script: 'curl -v -X POST -H "Content-Type:application/json" -i -H "Accept: application/json" --unix-socket /var/run/docker.sock http://0.0.0.0:2375/containers/netcoreapp/start', returnStdout: true)
     }
