@@ -51,13 +51,13 @@ def cloneRepo() {
 
 def dotnet_build(){
 	dir('Merken.NetCoreBuild.App') {
-		sh(script: 'dotnet build Merken.NetCoreBuild.App.csproj', returnStdout: true)
+		//sh(script: 'dotnet build Merken.NetCoreBuild.App.csproj', returnStdout: true)
 	}
 }
 
 def dotnet_test(){
 	dir('Merken.NetCoreBuild.Test') {
-		sh(script: 'dotnet test Merken.NetCoreBuild.Test.csproj', returnStdout: true)
+		//sh(script: 'dotnet test Merken.NetCoreBuild.Test.csproj', returnStdout: true)
 	}
 }
 
