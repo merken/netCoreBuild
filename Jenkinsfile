@@ -157,5 +157,6 @@ def dockerApiRequest(request, method, contenttype = 'json', accept = '', data = 
         return json;
     }
 
+    println "return null"
     return null;
 }
