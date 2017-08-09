@@ -71,7 +71,7 @@ def dotnet_publish(){
 
 def docker_build(){
     dir('Merken.NetCoreBuild.App') {
-        dockerApiRequest('containers/netcoreapp/stop', 'POST', 'json')
+        dockerApiRequest('containers/netcoreapp/stop', 'POST', 'json', '', )
         dockerApiRequest('containers/prune', 'POST', 'json')
         dockerApiRequest('images/netcoreapp', 'DELETE', 'json')
         dockerApiRequest('build?t=netcoreapp:' + VERSION_NUMBER + '&nocache=1&rm=1"', 'POST', 'tar','', '@netcoreapp.tar.gz', true)
@@ -93,7 +93,7 @@ def docker_run(){
 
         dockerApiRequest('containers/' + containerId + '/rename/?name=netcoreapp', 'POST', 'json')
         dockerApiRequest('containers/netcoreapp/start', 'POST', 'json')
-        
+
         //def response = sh(script: 'curl -X POST -H "Content-Type:application/json" -H "Accept: application/json" --unix-socket /var/run/docker.sock -d @imageconf http://0.0.0.0:2375/containers/create', returnStdout: true)
         //def containerId = response.id;
         // sh "echo cosntainer id: $response"
@@ -118,7 +118,7 @@ def getVersionNumber() {
     return commitCount;
 }
 
-def dockerApiRequest(request, method, contenttype, accept, data, isDataBinary){
+def dockerApiRequest(request, method, contenttype = 'json', accept = '', data = '', isDataBinary = false){
     def requestBuilder = 'curl -v -X ' + method + ' --unix-socket /var/run/docker.sock "http://0.0.0.0:2375/' + request + '"'
 
     if(contenttype == 'json'){
@@ -133,7 +133,7 @@ def dockerApiRequest(request, method, contenttype, accept, data, isDataBinary){
         requestBuilder += ' -H "Accept: application/json"'
     }
     
-    if(data){
+    if(!data.trim()){
         if(isDataBinary){
             requestBuilder += ' --data-binary ' + data + ' --dump-header - --no-buffer'
         }else{
