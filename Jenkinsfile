@@ -133,7 +133,7 @@ def dockerApiRequest(request, method, contenttype = 'json', accept = '', data = 
         requestBuilder += ' -H "Accept: application/json"'
     }
     
-    if(!data.trim()){
+    if(data.trim()){
         if(isDataBinary){
             requestBuilder += ' --data-binary ' + data + ' --dump-header - --no-buffer'
         }else{
