@@ -104,7 +104,8 @@ def createContainer(){
 }
 
 def renameContainer(containerId){
-    dockerApiRequest('containers/' + containerId + '/rename?name=netcoreapp', 'POST');
+    def request = 'containers/' + containerId + '/rename?name=netcoreapp';
+    dockerApiRequest(request, 'POST');
 }
 
 def startContainer(){
