@@ -89,12 +89,8 @@ def docker_run(){
         sh('echo \'{ "Image": "netcoreapp:' + VERSION_NUMBER + '", "ExposedPorts": { "5000/tcp" : {} }, "HostConfig": { "PortBindings": { "5000/tcp": [{ "HostPort": "5000" }] } } }\' > imageconf')
 
         def createResponse = dockerApiRequest('containers/create', 'POST', 'json', 'json', '@imageconf')
-                println "Use response $createResponse"
-        
-        sh 'echo $createResponse'
-        sh 'echo $createResponse.Id'
-        sh 'echo $createResponse.id'
         def containerId = createResponse.Id
+        println containerId
 
         dockerApiRequest('containers/' + containerId + '/rename/?name=netcoreapp', 'POST', 'json')
         dockerApiRequest('containers/netcoreapp/start', 'POST', 'json')
@@ -147,16 +143,12 @@ def dockerApiRequest(request, method, contenttype = 'json', accept = '', data = 
     }
 
     def response = sh(script: requestBuilder, returnStdout:true)
-    println response
 
     if(accept == 'json'){
         def jsonSlurper = new JsonSlurper()
         def json = jsonSlurper.parseText(response)
-        println json.toString()
-        println json.Id
         return json;
     }
 
-    println "return null"
     return null;
 }
