@@ -9,7 +9,9 @@ node {
             stage("scm pull") {
 				deleteDir()
 				cloneRepo()
-                determineVersionNumber()
+                VERSION_NUMBER = getVersionNumber()
+                println "Use version $VERSION_NUMBER"
+                currentBuild.displayName = "$VERSION_NUMBER"
             }
 
             stage ("dotnet build") {
@@ -69,11 +71,16 @@ def dotnet_publish(){
 
 def docker_build(){
     dir('Merken.NetCoreBuild.App') {
-        sh(script: 'curl -v -X POST -H "Content-Type:application/json" --unix-socket /var/run/docker.sock http://0.0.0.0:2375/containers/netcoreapp/stop', returnStdout: true)
-        sh(script: 'curl -v -X POST -H "Content-Type:application/json" --unix-socket /var/run/docker.sock http://0.0.0.0:2375/containers/prune', returnStdout: true)
-        sh(script: 'curl -v -X DELETE -H "Content-Type:application/json" --unix-socket /var/run/docker.sock http://0.0.0.0:2375/images/netcoreapp', returnStdout: true)
+        dockerApiRequest('containers/netcoreapp/stop', 'POST', 'json')
+        dockerApiRequest('containers/prune', 'POST', 'json')
+        dockerApiRequest('images/netcoreapp', 'DELETE', 'json')
+        dockerApiRequest('build?t=netcoreapp:' + VERSION_NUMBER + '&nocache=1&rm=1"', 'POST', 'tar','', '@netcoreapp.tar.gz', true)
 
-        sh(script: 'curl -v -X POST -H "Content-Type:application/x-tar" --data-binary @netcoreapp.tar.gz --dump-header - --no-buffer --unix-socket /var/run/docker.sock "http://0.0.0.0:2375/build?t=netcoreapp:' + VERSION_NUMBER + '&nocache=1&rm=1"', returnStdout: true)
+        //sh(script: 'curl -v -X POST -H "Content-Type:application/json" --unix-socket /var/run/docker.sock http://0.0.0.0:2375/containers/netcoreapp/stop', returnStdout: true)
+        //sh(script: 'curl -v -X POST -H "Content-Type:application/json" --unix-socket /var/run/docker.sock http://0.0.0.0:2375/containers/prune', returnStdout: true)
+        //sh(script: 'curl -v -X DELETE -H "Content-Type:application/json" --unix-socket /var/run/docker.sock http://0.0.0.0:2375/images/netcoreapp', returnStdout: true)
+
+        //sh(script: 'curl -v -X POST -H "Content-Type:application/x-tar" --data-binary @netcoreapp.tar.gz --dump-header - --no-buffer --unix-socket /var/run/docker.sock "http://0.0.0.0:2375/build?t=netcoreapp:' + VERSION_NUMBER + '&nocache=1&rm=1"', returnStdout: true)
     }
 }
 
@@ -81,37 +88,67 @@ def docker_run(){
     dir('Merken.NetCoreBuild.App') {
         sh('echo \'{ "Image": "netcoreapp:' + VERSION_NUMBER + '", "ExposedPorts": { "5000/tcp" : {} }, "HostConfig": { "PortBindings": { "5000/tcp": [{ "HostPort": "5000" }] } } }\' > imageconf')
 
-        def response = sh(script: 'curl -X POST -H "Content-Type:application/json" -H "Accept: application/json" --unix-socket /var/run/docker.sock -d @imageconf http://0.0.0.0:2375/containers/create', returnStdout: true)
+        def createResponse = dockerApiRequest('containers/create', 'POST', 'json', 'json', '@imageconf')
+        def containerId = createResponse.Id
+
+        dockerApiRequest('containers/' + containerId + '/rename/?name=netcoreapp', 'POST', 'json')
+        dockerApiRequest('containers/netcoreapp/start', 'POST', 'json')
+        
+        //def response = sh(script: 'curl -X POST -H "Content-Type:application/json" -H "Accept: application/json" --unix-socket /var/run/docker.sock -d @imageconf http://0.0.0.0:2375/containers/create', returnStdout: true)
         //def containerId = response.id;
-        sh "echo cosntainer id: $response"
-        def jsonSlurper = new JsonSlurper()
-        def json = jsonSlurper.parseText(response)
-        println json.toString()
-        def containerId = json.Id
-        sh "echo cosntffffainer id: $containerId"
+        // sh "echo cosntainer id: $response"
+        // def jsonSlurper = new JsonSlurper()
+        // def json = jsonSlurper.parseText(response)
+        // println json.toString()
+        // def containerId = json.Id
+        // sh "echo cosntffffainer id: $containerId"
         //sh(script: 'curl -v -X POST -H "Content-Type:application/json" -i -H "Accept: application/json" --unix-socket /var/run/docker.sock -d @imageconf http://0.0.0.0:2375/containers/create', returnStdout: true)
-        sh(script: 'curl -v -X POST -H "Content-Type:application/json" -i -H "Accept: application/json" --unix-socket /var/run/docker.sock http://0.0.0.0:2375/containers/netcoreapp/start', returnStdout: true)
+        //sh(script: 'curl -v -X POST -H "Content-Type:application/json" -i -H "Accept: application/json" --unix-socket /var/run/docker.sock http://0.0.0.0:2375/containers/netcoreapp/start', returnStdout: true)
     }
 }
 
 //Generates a version number
-def determineVersionNumber() {
+def getVersionNumber() {
     def out = sh(script: 'git rev-list --count HEAD', returnStdout: true)
     def array = out.split("\\r?\\n")
     def count = array[array.length - 1]
 
-    VERSION_NUMBER = count.trim()
-    println "Use version $VERSION_NUMBER"
-    currentBuild.displayName = "$VERSION_NUMBER"
+    def commitCount = count.trim()
+
+    return commitCount;
 }
 
-def restRequest(request){
-    def response = sh "${request}"
-    sh "echo respoense: $response"
+def dockerApiRequest(request, method, contenttype, accept, data, isDataBinary){
+    def requestBuilder = 'curl -v -X ' + method + ' --unix-socket /var/run/docker.sock "http://0.0.0.0:2375/' + request + '"'
 
-    def jsonSlurper = new JsonSlurper()
-    def json = jsonSlurper.parseText(response)
-    println json.toString()
+    if(contenttype == 'json'){
+        requestBuilder += ' -H "Content-Type:application/json"'
+    }
 
-    return json;
+    if(contenttype == 'tar'){
+        requestBuilder += ' -H "Content-Type:application/x-tar"'
+    }
+
+    if(accept == 'json'){
+        requestBuilder += ' -H "Accept: application/json"'
+    }
+    
+    if(data){
+        if(isDataBinary){
+            requestBuilder += ' --data-binary ' + data + ' --dump-header - --no-buffer'
+        }else{
+            requestBuilder += ' -d ' + data
+        }
+    }
+
+    def response = sh(script: requestBuilder, returnStdout:true)
+
+    if(accept == 'json'){
+        def jsonSlurper = new JsonSlurper()
+        def json = jsonSlurper.parseText(response)
+        println json.toString()
+        return json;
+    }
+
+    return null;
 }
