@@ -90,10 +90,10 @@ def docker_run(){
 
         def createResponse = dockerApiRequest('containers/create', 'POST', 'json', 'json', '@imageconf')
         def containerId = createResponse.Id
-        println containerId
+        println 'test ' + containerId 
 
-        dockerApiRequest('containers/' + containerId + '/rename/?name=netcoreapp', 'POST', 'json')
-        dockerApiRequest('containers/netcoreapp/start', 'POST', 'json')
+        //dockerApiRequest('containers/' + containerId + '/rename/?name=netcoreapp', 'POST', 'json')
+        //dockerApiRequest('containers/netcoreapp/start', 'POST', 'json')
 
         //def response = sh(script: 'curl -X POST -H "Content-Type:application/json" -H "Accept: application/json" --unix-socket /var/run/docker.sock -d @imageconf http://0.0.0.0:2375/containers/create', returnStdout: true)
         //def containerId = response.id;
