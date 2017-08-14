@@ -75,3 +75,4 @@ parameterized-trigger
 jquery
 build-pipeline-plugin
 xunit
+http_request

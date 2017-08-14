@@ -13,7 +13,7 @@ docker build build\. -t netcorebuild:latest
 Afterwards, run the container with port 8080 exposed and the docker socket connected:
 
 ```
-docker run -p 8080:8080 -v /var/run/docker.sock:/var/run/docker.sock --name netcorebuild netcorebuild:latest
+docker run -p 8080:8080 -d -v /var/run/docker.sock:/var/run/docker.sock --name netcorebuild netcorebuild:latest
 ```
 
 After the build, a new docker image + container will be created on your docker host.
