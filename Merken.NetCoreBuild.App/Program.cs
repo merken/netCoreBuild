@@ -19,9 +19,7 @@ namespace Merken.NetCoreBuild.App
 
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-                .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseStartup<Startup>()
-                .UseUrls("http://::5000")
                 .Build();
     }
 }
