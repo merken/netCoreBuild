@@ -54,6 +54,6 @@ RUN /bin/bash -c "source /var/dockerscripts/installnetcoredependencies.sh"
 # install the netcore sdk, to build, test, run and publish a netcore project
 RUN /bin/bash -c "source /var/dockerscripts/installnetcoresdk.sh"
 
-# # cleanup of installation scripts
-RUN  rm -rf /var/lib/apt/lists/*
+# cleanup of installation scripts
+RUN rm -rf /var/lib/apt/lists/*
 RUN rm -rf /var/dockerscripts
