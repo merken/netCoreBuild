@@ -1,119 +1,59 @@
-#https://dzone.com/articles/dockerizing-jenkins-2-setup-and-using-it-along-wit
+# this is the jenkins version, to upgrade the base image, alter the argument below
 ARG JENKINS_VERSION=2.60.2
-#this is the base image we use to create our image from
 FROM jenkins:$JENKINS_VERSION
 LABEL name "netcorebuild"
-#just info about who created this
 MAINTAINER Maarten Merken
 
 ARG NET_CORE_APP_NAME=netcorebuild
 ARG JENKINS_CLI_URL=https://repo.jenkins-ci.org/public/org/jenkins-ci/main/cli/$JENKINS_VERSION/cli-$JENKINS_VERSION-jar-with-dependencies.jar
-#get rid of admin password setup
+# get rid of admin password setup
 ENV JAVA_OPTS="-Djenkins.install.runSetupWizard=false"
 ENV JENKINS_HOME /var/jenkins_home
 
-RUN echo "Jenkins version $JENKINS_VERSION"
-RUN echo "App name $NET_CORE_APP_NAME"
-RUN echo "Jenkins CLI $JENKINS_CLI_URL"
-RUN echo "Jenkins home $JENKINS_HOME"
-RUN echo "NETCORE URL $ASPNETCORE_URLS"
-
-#networking
+# networking
 EXPOSE 8080
 
-#elevation
+# elevation
 USER root
 
-#install sudo
-RUN apt-get update && apt-get install -y --no-install-recommends \
-		sudo \
-	&& rm -rf /var/lib/apt/lists/*
-
-#add jenkins user to sudo group
-RUN adduser jenkins sudo
-
-#download jenkins cli, in case we need it inside the container
-RUN echo $JENKINS_CLI_URL
-RUN wget $JENKINS_CLI_URL -O jenkins-cli.jar
-
-#create the job directory and configuration
+# copy plugins to jenkins directory
+COPY plugins_.txt /usr/share/jenkins/plugins.txt
+# create the jenkins job directory and copy the job configuration
 RUN mkdir -p "$JENKINS_HOME"/jobs/"$NET_CORE_APP_NAME"
 COPY "$NET_CORE_APP_NAME".xml "$JENKINS_HOME"/jobs/"$NET_CORE_APP_NAME"/config.xml
 
-#automatically installing required plugins
-COPY plugins_.txt /usr/share/jenkins/plugins.txt 
-RUN /usr/local/bin/install-plugins.sh $(cat /usr/share/jenkins/plugins.txt | tr '\n' ' ')
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
-		ca-certificates \
-		curl \
-		wget \
-	&& rm -rf /var/lib/apt/lists/*
-
-#netcore stuff here
-#buildpack-deps stretch:curl https://github.com/docker-library/buildpack-deps/blob/master/stretch/curl/Dockerfile
-RUN apt-get update && apt-get install -y --no-install-recommends \
-		ca-certificates \
-		curl \
-		wget \
-	&& rm -rf /var/lib/apt/lists/*
-
-RUN set -ex; \
-	if ! command -v gpg > /dev/null; then \
-		apt-get update; \
-		apt-get install -y --no-install-recommends \
-			gnupg2 \
-			dirmngr \
-		; \
-		rm -rf /var/lib/apt/lists/*; \
-	fi
-
-#buildpack-deps stretch:scm https://github.com/docker-library/buildpack-deps/blob/master/stretch/scm/Dockerfile
-# procps is very common in build systems, and is a reasonably small package
-RUN apt-get update && apt-get install -y --no-install-recommends \
-		bzr \
-		git \
-		mercurial \
-		openssh-client \
-		subversion \
-		\
-		procps \
-	&& rm -rf /var/lib/apt/lists/*
-
-# Install .NET Core SDK https://github.com/dotnet/dotnet-docker/blob/master/2.0/sdk/stretch/amd64/Dockerfile
-# Install .NET CLI dependencies
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        libc6 \
-        libcurl3 \
-        libgcc1 \
-        libgssapi-krb5-2 \
-        libicu57 \
-        liblttng-ust0 \
-        libssl1.0.2 \
-        libstdc++6 \
-        libunwind8 \
-        libuuid1 \
-        zlib1g \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install .NET Core SDK
+# setup netcore environment
 ENV DOTNET_SDK_VERSION 2.0.0
 ENV DOTNET_SDK_DOWNLOAD_URL https://dotnetcli.blob.core.windows.net/dotnet/Sdk/$DOTNET_SDK_VERSION/dotnet-sdk-$DOTNET_SDK_VERSION-linux-x64.tar.gz
 ENV DOTNET_SDK_DOWNLOAD_SHA E457F3A5685382F7F24851A2E76EDBE75B575948C8A7F43220F159BA29C329A5008BBE7220C18DFB31EAF0398FC72177B1948B65E19B34ED0D907EFB459CF4B0
 
-RUN curl -SL $DOTNET_SDK_DOWNLOAD_URL --output dotnet.tar.gz \
-    && echo "$DOTNET_SDK_DOWNLOAD_SHA dotnet.tar.gz" | sha512sum -c - \
-    && mkdir -p /usr/share/dotnet \
-    && tar -zxf dotnet.tar.gz -C /usr/share/dotnet \
-    && rm dotnet.tar.gz \
-    && ln -s /usr/share/dotnet/dotnet /usr/bin/dotnet
+# create temporary scripts folder
+RUN mkdir -p /var/dockerscripts
 
-# Trigger the population of the local package cache
-ENV NUGET_XMLDOC_MODE skip
-RUN mkdir warmup \
-    && cd warmup \
-    && dotnet new \
-    && cd .. \
-    && rm -rf warmup \
-    && rm -rf /tmp/NuGetScratch
+# copy build scripts
+COPY installsudo.sh /var/dockerscripts/
+COPY installcurl.sh /var/dockerscripts/
+COPY installscmpackages.sh /var/dockerscripts/
+COPY installjenkinscli.sh /var/dockerscripts/
+COPY installjenkinsplugins.sh /var/dockerscripts/
+COPY installnetcoredependencies.sh /var/dockerscripts/
+COPY installnetcoresdk.sh /var/dockerscripts/
+
+# sudo is required for running command in elevation
+RUN /bin/bash -c "source /var/dockerscripts/installsudo.sh"
+# curl is required for downloading external packagese
+RUN /bin/bash -c "source /var/dockerscripts/installcurl.sh"
+# # scm packages are required for git/mercurial/svn support in jenkins
+RUN /bin/bash -c "source /var/dockerscripts/installscmpackages.sh"
+# the jenkins cli might come in handy at some point
+RUN /bin/bash -c "source /var/dockerscripts/installjenkinscli.sh"
+# install all required jenkins plugins, like pipeline support, etc
+RUN /bin/bash -c "source /var/dockerscripts/installjenkinsplugins.sh"
+# install the netcore cli dependencies
+RUN /bin/bash -c "source /var/dockerscripts/installnetcoredependencies.sh"
+# install the netcore sdk, to build, test, run and publish a netcore project
+RUN /bin/bash -c "source /var/dockerscripts/installnetcoresdk.sh"
+
+# # cleanup of installation scripts
+RUN  rm -rf /var/lib/apt/lists/*
+RUN rm -rf /var/dockerscripts
