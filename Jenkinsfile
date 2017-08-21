@@ -56,7 +56,7 @@ def dotnet_build(){
 
 def dotnet_test(){
 	dir('Merken.NetCoreBuild.Test') {
-		sh(script: 'dotnet test Merken.NetCoreBuild.Test.csproj -xml results.xml', returnStdout: true);
+		sh(script: 'dotnet test Merken.NetCoreBuild.Test.csproj -o results.xml', returnStdout: true);
          step([$class: 'XUnitBuilder',
                 thresholds: [[$class: 'FailedThreshold', unstableThreshold: '1']],
                 tools: [[$class: 'JUnitType', pattern: '**']]])
