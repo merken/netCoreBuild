@@ -59,6 +59,9 @@ def dotnet_test(){
 		sh(script: 'mkdir results', returnStdout: true);
         sh(script: 'dotnet build Merken.NetCoreBuild.Test.csproj', returnStdout: true);
 		sh(script: 'dotnet xunit -xml results/results.xml', returnStdout: true);
+		sh(script: 'dotnet xunit -nunit results/results_nunit.xml', returnStdout: true);
+		sh(script: 'dotnet xunit -xmlv1 results/results_v1.xml', returnStdout: true);
+		sh(script: 'dotnet xunit -html results/results.html', returnStdout: true);
          step([$class: 'XUnitBuilder',
                 thresholds: [[$class: 'FailedThreshold', unstableThreshold: '1']],
                 tools: [[$class: 'JUnitType', pattern: 'results/**']]])
