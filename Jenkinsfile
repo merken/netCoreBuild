@@ -66,7 +66,7 @@ def dotnet_test(){
 
         step([$class: 'XUnitBuilder',
             thresholds: [[$class: 'FailedThreshold', unstableThreshold: '1']],
-            tools: [[$class: 'JUnitType', pattern: 'results/*.*']]])
+            tools: [[$class: 'JUnitType', pattern: '*.*']]])
 	}
 }
 
