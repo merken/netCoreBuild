@@ -10,7 +10,8 @@ namespace Merken.NetCoreBuild.Transform
     {
         static void Main(string[] args)
         {
-            try{
+            try
+            {
                 string xml = args[0];
                 string xsl = args[1];
                 string output = args[2];
@@ -21,7 +22,8 @@ namespace Merken.NetCoreBuild.Transform
                 var transformedXml = Transform(xmlFile, xslFile);
                 transformedXml.Save(output);
             }
-            catch(Exception ex){
+            catch (Exception ex)
+            {
                 Console.WriteLine(ex.Message);
                 Console.WriteLine(ex.StackTrace);
             }
@@ -33,9 +35,10 @@ namespace Merken.NetCoreBuild.Transform
             string text = System.IO.File.ReadAllText(path);
             return text;
         }
-        
-        static void WriteTextFile(string path, string contents){
-                System.IO.File.WriteAllText(path, contents);
+
+        static void WriteTextFile(string path, string contents)
+        {
+            System.IO.File.WriteAllText(path, contents);
         }
 
         static XDocument Transform(string xml, string xsl)
@@ -48,9 +51,7 @@ namespace Merken.NetCoreBuild.Transform
                 var xslt = new XslCompiledTransform();
                 xslt.Load(XmlReader.Create(new StringReader(xsl)));
 
-                // Add XSLT parameters if you need
-                XsltArgumentList xsltArguments = null; // new XsltArgumentList();
-                // xsltArguments.AddParam(name, namespaceUri, parameter);
+                XsltArgumentList xsltArguments = null;
 
                 xslt.Transform(originalXml.CreateReader(), xsltArguments, xmlWriter);
             }
