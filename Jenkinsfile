@@ -57,15 +57,15 @@ def dotnet_build(){
 def dotnet_test(){
 	dir('Merken.NetCoreBuild.Test') {
 		sh(script: 'mkdir results', returnStdout: true);
-        sh(script: 'dotnet build Merken.NetCoreBuild.Test.csproj', returnStdout: true);
-		sh(script: 'dotnet test -r results', returnStdout: true);        
 		sh(script: 'dotnet xunit -xml results/results.xml', returnStdout: true);
-		sh(script: 'dotnet xunit -nunit resultsn/results_nunit.xml', returnStdout: true);
-		sh(script: 'dotnet xunit -xmlv1 resultsv/results_v1.xml', returnStdout: true);
-		sh(script: 'dotnet xunit -html resultsh/results.html', returnStdout: true);
+    }
+
+    dir('Merken.NetCoreBuild.Transform') {
+		sh(script: 'dotnet run ../Merken.NetCoreBuild.Test/results/results.xml xunitdotnet-2.0-to-junit-2.xsl results.xml', returnStdout: true);
+
         step([$class: 'XUnitBuilder',
             thresholds: [[$class: 'FailedThreshold', unstableThreshold: '1']],
-            tools: [[$class: 'JUnitType', pattern: 'results/*.*, resultsn/*.*, resultsv/*.*, resultsh/*.*']]])
+            tools: [[$class: 'JUnitType', pattern: 'results/*.*']]])
 	}
 }
 
