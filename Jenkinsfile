@@ -57,6 +57,7 @@ def dotnet_build(){
 def dotnet_test(){
 	dir('Merken.NetCoreBuild.Test') {
 		sh(script: 'mkdir results', returnStdout: true);
+		sh(script: 'dotnet restore', returnStdout: true);
 		sh(script: 'dotnet xunit -xml results/results.xml', returnStdout: true);
     }
 
