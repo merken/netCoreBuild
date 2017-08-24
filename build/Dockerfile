@@ -4,7 +4,7 @@ FROM jenkins:$JENKINS_VERSION
 LABEL name "netcorebuild"
 MAINTAINER Maarten Merken
 
-ARG NET_CORE_APP_NAME=netcorebuild
+ARG NET_CORE_APP_NAME=netcoreapp
 ARG JENKINS_CLI_URL=https://repo.jenkins-ci.org/public/org/jenkins-ci/main/cli/$JENKINS_VERSION/cli-$JENKINS_VERSION-jar-with-dependencies.jar
 # get rid of admin password setup
 ENV JAVA_OPTS="-Djenkins.install.runSetupWizard=false"
