@@ -17,7 +17,7 @@ EXPOSE 8080
 USER root
 
 # copy plugins to jenkins directory
-COPY plugins_.txt /usr/share/jenkins/plugins.txt
+COPY plugins.txt /usr/share/jenkins/plugins.txt
 # create the jenkins job directory and copy the job configuration
 RUN mkdir -p "$JENKINS_HOME"/jobs/"$NET_CORE_APP_NAME"
 COPY "$NET_CORE_APP_NAME".xml "$JENKINS_HOME"/jobs/"$NET_CORE_APP_NAME"/config.xml
