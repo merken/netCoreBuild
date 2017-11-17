@@ -21,6 +21,8 @@ After the build, a new docker image + container will be created on your docker h
 You can create your own jenkins project by copying the build/pipelineTemplate.xml and replacing the tokens in [braces].
 Don't forget to include this in the build/dockerfile.
 
+Keep in mind that all bash file line endings must be configured for LF (linux) and not CRLF.
+
 ![alt text](https://github.com/merken/netCoreBuild/blob/master/build/jenkins.png)
 
 ![alt text](https://github.com/merken/netCoreBuild/blob/master/build/netcoreapp.png)
